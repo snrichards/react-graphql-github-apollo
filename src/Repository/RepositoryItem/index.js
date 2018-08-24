@@ -151,7 +151,7 @@ const RepositoryItem = ({
           <Mutation mutation={SUBSCRIBE_TO_REPOSITORY} variables={{ id }}>
             {(updateSubscription, { data, loading, error }) => (
               <Button className={'RepositoryItem-title-action'} onClick={updateSubscription}>
-                {watchers.totalCount} Watchers
+                {watchers.totalCount} Watch
               </Button>
             )}
           </Mutation>
@@ -159,7 +159,7 @@ const RepositoryItem = ({
           <Mutation mutation={UNSUBSCRIBE_TO_REPOSITORY} variables={{ id }}>
             {(updateSubscription, { data, loading, error }) => (
               <Button className={'RepositoryItem-title-action'} onClick={updateSubscription}>
-                {watchers.totalCount} Watchers
+                {watchers.totalCount} Unwatch
               </Button>
             )}
           </Mutation>
