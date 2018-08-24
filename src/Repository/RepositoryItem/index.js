@@ -27,6 +27,28 @@ const UNSTAR_REPOSITORY = gql`
   }
 `;
 
+const SUBSCRIBE_TO_REPOSITORY = gql`
+  mutation($id: ID!) {
+    updateSubscription(input: { subscribableId: $id, state: SUBSCRIBED }) {
+      subscribable {
+        id
+        viewerSubscription
+      }
+    }
+  }
+`;
+
+const UNSUBSCRIBE_TO_REPOSITORY = gql`
+  mutation($id: ID!) {
+    updateSubscription(input: { subscribableId: $id, state: UNSUBSCRIBED }) {
+      subscribable {
+        id
+        viewerSubscription
+      }
+    }
+  }
+`;
+
 const RepositoryItem = ({
   id,
   name,
@@ -59,6 +81,24 @@ const RepositoryItem = ({
             {(removeStar, { data, loading, error }) => (
               <Button className={'RepositoryItem-title-action'} onClick={removeStar}>
                 {stargazers.totalCount} Stars
+              </Button>
+            )}
+          </Mutation>
+        )}
+
+        {viewerSubscription === 'UNSUBSCRIBED' ? (
+          <Mutation mutation={SUBSCRIBE_TO_REPOSITORY} variables={{ id }}>
+            {(updateSubscription, { data, loading, error }) => (
+              <Button className={'RepositoryItem-title-action'} onClick={updateSubscription}>
+                {watchers.totalCount} Watchers
+              </Button>
+            )}
+          </Mutation>
+        ) : (
+          <Mutation mutation={UNSUBSCRIBE_TO_REPOSITORY} variables={{ id }}>
+            {(updateSubscription, { data, loading, error }) => (
+              <Button className={'RepositoryItem-title-action'} onClick={updateSubscription}>
+                {watchers.totalCount} Watchers
               </Button>
             )}
           </Mutation>
