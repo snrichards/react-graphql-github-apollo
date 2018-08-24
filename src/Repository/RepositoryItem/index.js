@@ -110,6 +110,66 @@ const updateRemoveStar = (
   });
 };
 
+const updateSubscribed = (
+  client,
+  {
+    data: {
+      updateSubscription: {
+        subscribable: { id },
+      },
+    },
+  },
+) => {
+  const repository = client.readFragment({
+    id: `Repository:${id}`,
+    fragment: REPOSITORY_FRAGMENT,
+  });
+
+  const totalCount = repository.watchers.totalCount + 1;
+
+  client.writeFragment({
+    id: `Repository:${id}`,
+    fragment: REPOSITORY_FRAGMENT,
+    data: {
+      ...repository,
+      watchers: {
+        ...repository.watchers,
+        totalCount,
+      },
+    },
+  });
+};
+
+const updateUnsubscribed = (
+  client,
+  {
+    data: {
+      updateSubscription: {
+        subscribable: { id },
+      },
+    },
+  },
+) => {
+  const repository = client.readFragment({
+    id: `Repository:${id}`,
+    fragment: REPOSITORY_FRAGMENT,
+  });
+
+  const totalCount = repository.watchers.totalCount - 1;
+
+  client.writeFragment({
+    id: `Repository:${id}`,
+    fragment: REPOSITORY_FRAGMENT,
+    data: {
+      ...repository,
+      watchers: {
+        ...repository.watchers,
+        totalCount,
+      },
+    },
+  });
+};
+
 const RepositoryItem = ({
   id,
   name,
@@ -148,7 +208,7 @@ const RepositoryItem = ({
         )}
 
         {viewerSubscription === 'UNSUBSCRIBED' ? (
-          <Mutation mutation={SUBSCRIBE_TO_REPOSITORY} variables={{ id }}>
+          <Mutation mutation={SUBSCRIBE_TO_REPOSITORY} variables={{ id }} update={updateSubscribed}>
             {(updateSubscription, { data, loading, error }) => (
               <Button className={'RepositoryItem-title-action'} onClick={updateSubscription}>
                 {watchers.totalCount} Watch
@@ -156,7 +216,7 @@ const RepositoryItem = ({
             )}
           </Mutation>
         ) : (
-          <Mutation mutation={UNSUBSCRIBE_TO_REPOSITORY} variables={{ id }}>
+          <Mutation mutation={UNSUBSCRIBE_TO_REPOSITORY} variables={{ id }} update={updateUnsubscribed}>
             {(updateSubscription, { data, loading, error }) => (
               <Button className={'RepositoryItem-title-action'} onClick={updateSubscription}>
                 {watchers.totalCount} Unwatch
