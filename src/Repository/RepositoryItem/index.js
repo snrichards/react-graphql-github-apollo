@@ -208,7 +208,21 @@ const RepositoryItem = ({
         )}
 
         {viewerSubscription === 'UNSUBSCRIBED' ? (
-          <Mutation mutation={SUBSCRIBE_TO_REPOSITORY} variables={{ id }} update={updateSubscribed}>
+          <Mutation
+            mutation={SUBSCRIBE_TO_REPOSITORY}
+            variables={{ id }}
+            update={updateSubscribed}
+            optimisticResponse={{
+              updateSubscription: {
+                __typename: 'Mutation',
+                subscribable: {
+                  __typename: 'Repository',
+                  id,
+                  viewerSubscription: 'SUBSCRIBED',
+                },
+              },
+            }}
+          >
             {(updateSubscription, { data, loading, error }) => (
               <Button className={'RepositoryItem-title-action'} onClick={updateSubscription}>
                 {watchers.totalCount} Watch
@@ -216,7 +230,21 @@ const RepositoryItem = ({
             )}
           </Mutation>
         ) : (
-          <Mutation mutation={UNSUBSCRIBE_TO_REPOSITORY} variables={{ id }} update={updateUnsubscribed}>
+          <Mutation
+            mutation={UNSUBSCRIBE_TO_REPOSITORY}
+            variables={{ id }}
+            update={updateUnsubscribed}
+            optimisticResponse={{
+              updateSubscription: {
+                __typename: 'Mutation',
+                subscription: {
+                  __typename: 'Repository',
+                  id,
+                  viewerSubscription: 'UNSUBSCRIBED',
+                },
+              },
+            }}
+          >
             {(updateSubscription, { data, loading, error }) => (
               <Button className={'RepositoryItem-title-action'} onClick={updateSubscription}>
                 {watchers.totalCount} Unwatch
