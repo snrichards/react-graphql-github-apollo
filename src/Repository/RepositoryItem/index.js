@@ -190,7 +190,21 @@ const RepositoryItem = ({
 
       <div>
         {!viewerHasStarred ? (
-          <Mutation mutation={STAR_REPOSITORY} variables={{ id }} update={updateAddStar}>
+          <Mutation
+            mutation={STAR_REPOSITORY}
+            variables={{ id }}
+            update={updateAddStar}
+            optimisticResponse={{
+              addStar: {
+                __typename: 'Mutation',
+                starrable: {
+                  __typename: 'Repository',
+                  id,
+                  viewerHasStarred: true,
+                },
+              },
+            }}
+          >
             {(addStar, { data, loading, error }) => (
               <Button className={'RepositoryItem-title-action'} onClick={addStar}>
                 {stargazers.totalCount} Star
@@ -198,7 +212,21 @@ const RepositoryItem = ({
             )}
           </Mutation>
         ) : (
-          <Mutation mutation={UNSTAR_REPOSITORY} variables={{ id }} update={updateRemoveStar}>
+          <Mutation
+            mutation={UNSTAR_REPOSITORY}
+            variables={{ id }}
+            update={updateRemoveStar}
+            optimisticResponse={{
+              addStar: {
+                __typename: 'Mutation',
+                starrable: {
+                  __typename: 'Repository',
+                  id,
+                  viewerHasStarred: false,
+                },
+              },
+            }}
+          >
             {(removeStar, { data, loading, error }) => (
               <Button className={'RepositoryItem-title-action'} onClick={removeStar}>
                 {stargazers.totalCount} Unstar
