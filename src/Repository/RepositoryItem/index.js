@@ -237,7 +237,7 @@ const RepositoryItem = ({
             optimisticResponse={{
               updateSubscription: {
                 __typename: 'Mutation',
-                subscription: {
+                subscribable: {
                   __typename: 'Repository',
                   id,
                   viewerSubscription: 'UNSUBSCRIBED',
