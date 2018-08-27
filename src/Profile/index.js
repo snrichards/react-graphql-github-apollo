@@ -38,7 +38,9 @@ const Profile = () => (
         return <Loading />;
       }
 
-      return <RepositoryList repositories={viewer.repositories} fetchMore={fetchMore} loading={loading} />;
+      return (
+        <RepositoryList repositories={viewer.repositories} fetchMore={fetchMore} loading={loading} entry={'viewer'} />
+      );
     }}
   </Query>
 );
