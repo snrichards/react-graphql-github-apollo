@@ -7,11 +7,12 @@ import Loading from '../../Loading';
 import ErrorMessage from '../../Error';
 import { ButtonUnobtrusive } from '../../Button';
 import './style.css';
+import FetchMore from '../../FetchMore';
 
 const GET_ISSUES_OF_REPOSITORY = gql`
-  query($repositoryOwner: String!, $repositoryName: String!, $issueState: IssueState!) {
+  query($repositoryOwner: String!, $repositoryName: String!, $issueState: IssueState!, $cursor: String) {
     repository(name: $repositoryName, owner: $repositoryOwner) {
-      issues(first: 5, states: [$issueState]) {
+      issues(first: 5, after: $cursor, states: [$issueState]) {
         edges {
           node {
             id
@@ -22,10 +23,32 @@ const GET_ISSUES_OF_REPOSITORY = gql`
             bodyHTML
           }
         }
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
       }
     }
   }
 `;
+
+const updateQuery = (perviousResult, { fetchMoreResult }) => {
+  if (!fetchMoreResult) {
+    return perviousResult;
+  }
+
+  return {
+    ...perviousResult,
+    repository: {
+      ...perviousResult.repository,
+      issues: {
+        ...perviousResult.repository.issues,
+        ...fetchMoreResult.repository.issues,
+        edges: [...perviousResult.repository.issues.edges, ...fetchMoreResult.repository.issues.edges],
+      },
+    },
+  };
+};
 
 const ISSUE_STATES = {
   NONE: 'NONE',
@@ -62,7 +85,7 @@ const Issues = ({ repositoryOwner, repositoryName, issueState, onChangeIssueStat
           issueState,
         }}
       >
-        {({ data, loading, error }) => {
+        {({ data, loading, error, fetchMore }) => {
           if (error) {
             return <ErrorMessage error={error} />;
           }
@@ -73,18 +96,29 @@ const Issues = ({ repositoryOwner, repositoryName, issueState, onChangeIssueStat
             return <Loading />;
           }
 
-          return <IssueList issues={repository.issues} />;
+          return <IssueList issues={repository.issues} loading={loading} fetchMore={fetchMore} />;
         }}
       </Query>
     )}
   </div>
 );
 
-const IssueList = ({ issues }) => (
+const IssueList = ({ issues, loading, fetchMore }) => (
   <div className="IssueList">
     {issues.edges.map(({ node }) => (
       <IssueItem key={node.id} issue={node} />
     ))}
+    <FetchMore
+      loading={loading}
+      hasNextPage={issues.pageInfo.hasNextPage}
+      variables={{
+        cursor: issues.pageInfo.endCursor,
+      }}
+      updateQuery={updateQuery}
+      fetchMore={fetchMore}
+    >
+      issues
+    </FetchMore>
   </div>
 );
 
